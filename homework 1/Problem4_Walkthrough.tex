@@ -1,0 +1,136 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\usepackage{parskip}
+
+\newcommand{\R}{\mathbb{R}}
+
+\title{Problem 4 --- Full Walkthrough\\ \large Linewise local minima}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\textbf{Setup:} Let $f:\R^n\to\R$ be differentiable, and suppose $x^\star$ is a local minimum of $f$ along every line through $x^\star$ --- that is, for every direction $d\in\R^n$, the function $g(\alpha) = f(x^\star+\alpha d)$ has a local minimum at $\alpha=0$.
+
+\section*{Part (a) --- Show $\nabla f(x^\star)=0$}
+
+\subsection*{Step 1 --- Fix an arbitrary direction}
+
+Fix any $d\in\R^n$ (this is given to us by hypothesis --- the property holds for \emph{every} $d$, so we're free to reason about one arbitrary, unspecified $d$ and conclude something that then holds for all of them). Define
+\[
+g(\alpha) := f(x^\star+\alpha d), \qquad \alpha\in\R.
+\]
+
+\subsection*{Step 2 --- Differentiate $g$ via the chain rule}
+
+Write $g(\alpha) = f(h(\alpha))$ where $h(\alpha) := x^\star+\alpha d$. Since $h$ is affine, $h'(\alpha) = d$ for every $\alpha$. By the (multivariable) chain rule,
+\[
+g'(\alpha) = \nabla f(h(\alpha))^T h'(\alpha) = \nabla f(x^\star+\alpha d)^T d.
+\]
+In particular, at $\alpha=0$:
+\[
+g'(0) = \nabla f(x^\star)^T d.
+\]
+
+\subsection*{Step 3 --- Use the local-min hypothesis on $g$}
+
+By assumption, $g$ has a local minimum at $\alpha=0$. Since $\alpha=0$ is an interior point of $g$'s domain ($\R$) and $g$ is differentiable there, the standard first-order necessary condition for a one-variable local minimum applies: $g'(0)=0$. (If $g'(0)$ were nonzero, moving $\alpha$ slightly in the appropriate direction would strictly decrease $g$, contradicting a local minimum at $0$.)
+
+\subsection*{Step 4 --- Combine Steps 2 and 3}
+
+\[
+\nabla f(x^\star)^T d = g'(0) = 0.
+\]
+Since $d$ was an arbitrary direction (Step 1), this holds for \emph{every} $d\in\R^n$:
+\[
+\nabla f(x^\star)^T d = 0, \qquad \forall\, d \in \R^n.
+\]
+
+\subsection*{Step 5 --- Choose the one direction that finishes the proof}
+
+This is the key trick: since the equation above holds for literally every $d$, we are free to plug in whichever $d$ is most convenient. Choose
+\[
+d := \nabla f(x^\star).
+\]
+Substituting:
+\[
+\nabla f(x^\star)^T \nabla f(x^\star) = 0 \quad\Longrightarrow\quad \|\nabla f(x^\star)\|^2 = 0.
+\]
+
+\subsection*{Step 6 --- Conclude}
+
+Write out the squared norm: $\|\nabla f(x^\star)\|^2 = \big(\partial f/\partial x_1\big)^2 + \cdots + \big(\partial f/\partial x_n\big)^2$, a sum of squares. A sum of nonnegative terms equals zero only if every term is individually zero. So each partial derivative of $f$ at $x^\star$ is zero, i.e.
+\[
+\nabla f(x^\star) = 0. \qquad \blacksquare
+\]
+
+\section*{Part (b) --- An example where $x^\star$ is not actually a local minimum}
+
+\subsection*{Step 1 --- The example}
+
+Let $0<p<q$, and define
+\[
+f(y,z) = (z-py^2)(z-qy^2).
+\]
+We'll check the point $x^\star=(0,0)$: $f(0,0) = (0-0)(0-0)=0$.
+
+\subsection*{Step 2 --- Verify $(0,0)$ is a local minimum along every line through it}
+
+Take an arbitrary direction $d=(a,b)\ne(0,0)$, and parametrize the line as $(y,z) = (\alpha a,\alpha b)$:
+\[
+g(\alpha) := f(\alpha a,\alpha b) = \big(\alpha b - p\alpha^2a^2\big)\big(\alpha b - q\alpha^2a^2\big).
+\]
+
+\textbf{Case $a=0$ (so $b\ne0$):}
+\[
+g(\alpha) = (\alpha b - 0)(\alpha b - 0) = (\alpha b)^2 \ge 0,
+\]
+with equality only at $\alpha=0$. So $g$ has a strict global (hence local) minimum at $\alpha=0$.
+
+\textbf{Case $a\ne0,\ b\ne0$:} factor out $\alpha^2$:
+\[
+g(\alpha) = \alpha^2\big[(b-p\alpha a^2)(b-q\alpha a^2)\big].
+\]
+As $\alpha\to0$, the bracketed factor is continuous and approaches $b\cdot b = b^2 > 0$. So there is some neighborhood of $\alpha=0$ where the bracket stays strictly positive. On that neighborhood, $g(\alpha) = \alpha^2 \times (\text{positive number})\ge 0$, with equality only at $\alpha=0$ (since $\alpha^2=0$ only there). So $g$ has a strict local minimum at $\alpha=0$.
+
+\textbf{Case $a\ne0,\ b=0$:}
+\[
+g(\alpha) = (0-p\alpha^2a^2)(0-q\alpha^2a^2) = (p\alpha^2a^2)(q\alpha^2a^2) = pq\,a^4\alpha^4 \ge 0,
+\]
+with equality only at $\alpha=0$ (since $p,q,a^4>0$). Local minimum at $\alpha=0$.
+
+Every possible direction $(a,b)\ne(0,0)$ falls into one of these three cases, and in each one $g(\alpha)\ge g(0)=0$ near $\alpha=0$. So \textbf{$(0,0)$ is a local minimum of $f$ along every single line through it.}
+
+\subsection*{Step 3 --- Show $(0,0)$ is \emph{not} actually a local minimum of $f$}
+
+The hint suggests looking off the straight lines entirely --- along the curved path $z=my^2$ for some fixed $m$ with $p<m<q$. Substitute $z=my^2$ into $f$:
+\[
+f(y,my^2) = \big(my^2-py^2\big)\big(my^2-qy^2\big) = y^2(m-p)\cdot y^2(m-q) = y^4(m-p)(m-q).
+\]
+Since $p<m<q$: $(m-p)>0$ and $(m-q)<0$, so their product is negative. And $y^4 \ge 0$, strictly positive whenever $y\ne0$. So:
+\[
+f(y,my^2) = y^4 \cdot \underbrace{(m-p)(m-q)}_{<0} \;<\; 0 \qquad \text{for every } y\ne0.
+\]
+Meanwhile $f(0,0)=0$. As $y\to0$, the points $(y,my^2)$ approach $(0,0)$, and along this entire path $f$ stays strictly negative --- meaning \textbf{every neighborhood of $(0,0)$, no matter how small, contains points where $f$ is strictly less than $f(0,0)$.} That directly violates the definition of a local minimum (which requires $f(x)\ge f(x^\star)$ for \emph{all} nearby $x$, not just along straight lines). \textbf{So $(0,0)$ is not a local minimum of $f$.} $\blacksquare$
+
+\subsection*{Why this doesn't contradict part (a): a consistency check}
+
+Part (a) says a linewise local minimum must have zero gradient. It does \emph{not} say a linewise local minimum must be an actual local minimum --- and this example is precisely why that distinction matters. As a sanity check, let's confirm $\nabla f(0,0)=0$ really does hold here, directly from the formula (as it must, by part (a), since we just verified $(0,0)$ satisfies the linewise-minimum hypothesis).
+
+Let $u=z-py^2$, $w=z-qy^2$, so $f=uw$. By the product rule:
+\[
+\frac{\partial f}{\partial z} = w+u = (z-qy^2)+(z-py^2) = 2z-(p+q)y^2,
+\]
+\[
+\frac{\partial f}{\partial y} = -2py\cdot w - 2qy\cdot u = -2py(z-qy^2) - 2qy(z-py^2) = -2(p+q)yz + 4pq\,y^3.
+\]
+At $(y,z)=(0,0)$:
+\[
+\frac{\partial f}{\partial z}\Big|_{(0,0)} = 2(0)-(p+q)(0)^2 = 0, \qquad \frac{\partial f}{\partial y}\Big|_{(0,0)} = -2(p+q)(0)(0)+4pq(0)^3 = 0.
+\]
+So $\nabla f(0,0)=(0,0)$, confirming directly what part (a) guarantees. The point is a genuine stationary point --- flat in every direction --- yet still not a local minimum, because the function dips below its value at $(0,0)$ along a curved path that no straight line happens to detect. This is exactly why second-order conditions (or, as here, direct inspection along curves) are sometimes needed beyond the gradient test.
+
+\end{document}

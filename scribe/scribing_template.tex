@@ -1,0 +1,79 @@
+\documentclass[11pt, a4paper]{article}
+
+%\usepackage{geometry}
+\usepackage[inner=1.5cm,outer=1.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+
+\pagestyle{empty}
+\usepackage{algorithm2e}
+\usepackage{amsbsy}
+\usepackage{enumitem}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage[english]{babel}
+\usepackage{commath}
+\usepackage{dsfont}
+\usepackage[T1]{fontenc}
+\usepackage[capitalize]{cleveref}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{natbib}
+
+\usepackage{lipsum}
+
+\linespread{1.1}
+
+% Allow use of "blah" instead of ``blah''
+
+\usepackage{csquotes}
+\MakeOuterQuote{"}
+
+% Header variables here.
+
+\newcommand\coursename{COSC 594/650 Fall 2026}
+\newcommand\scribe{R. Tyson Beach}
+\newcommand\lecturedate{<lecture date>}
+\newcommand\lecturetitle{Lecture <number>: <title>}
+
+% Define theorem environments here.
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+
+\usepackage{tcolorbox}
+
+% Put your custom macros here.
+
+\begin{document}
+
+% This creates the header for scribe notes.
+\begin{tcolorbox}
+\noindent \coursename \hfill Scribes: \scribe \\
+\lecturedate \hfill 
+\begin{center}
+  {\Large\lecturetitle}
+\end{center}
+\end{tcolorbox}
+
+\vspace{0.5em}
+\noindent Please use this template to scribe lectures. Below we provide some instructions on scribing.
+
+\section{Scribe duties}
+
+Scribing lectures is a part of class participation (10\% of the course).  
+
+The scribe notes will be evaluated based on mathematical correctness, clarity of writing, faithfulness to what was covered in lecture, and inclusion of bibliographic pointers to relevant literature. 
+
+\section{TeX conventions}
+
+Please refrain from using a separate style file; instead define any macros that you need within this TeX file.
+
+For the bibliography, directly add BibTeX entries to \texttt{refs.bib} and include that file as an attachment when you email your scribe notes. 
+
+\bibliographystyle{alpha}
+\bibliography{scriberefs}
+
+\end{document}

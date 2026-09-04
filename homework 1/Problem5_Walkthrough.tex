@@ -1,0 +1,151 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\usepackage{parskip}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\tr}{\operatorname{tr}}
+
+\title{Problem 5 --- Full Walkthrough\\ \large Symmetric rank-one matrix approximation}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\textbf{Setup:} Let $A = x_0x_0^T \ne 0$ be a symmetric rank-one matrix, $x_0\in\R^n$. Consider
+\[
+f(x) := \tfrac12\|A-xx^T\|_F^2, \qquad x\in\R^n.
+\]
+
+\textbf{A fact we'll use throughout:} the Frobenius norm is a norm, so $\|A-xx^T\|_F^2 \ge 0$ always, with equality if and only if $A-xx^T=0$, i.e.\ $xx^T=A$ exactly. So $f(x)\ge0$ for every $x$, with $f(x)=0$ exactly when $xx^T=A$.
+
+\section*{Step 1 --- Expand $f(x)$ into a usable formula}
+
+Since $A$ and $xx^T$ are both symmetric, $(A-xx^T)^T = A-xx^T$, so
+\[
+\|A-xx^T\|_F^2 = \tr\big((A-xx^T)^T(A-xx^T)\big) = \tr\big((A-xx^T)(A-xx^T)\big).
+\]
+Expand the product inside the trace:
+\[
+(A-xx^T)(A-xx^T) = A^2 - A\,xx^T - xx^T A + xx^Txx^T.
+\]
+Apply $\tr(\cdot)$ term by term, using that trace is invariant under cyclic permutation of a product ($\tr(PQ)=\tr(QP)$):
+\[
+\tr(A\,xx^T) = \tr(xx^T A) \qquad\Longrightarrow\qquad \tr(Axx^T)+\tr(xx^TA) = 2\tr(Axx^T).
+\]
+Also, by the cyclic property, $\tr(Axx^T) = \tr(x^TAx) = x^TAx$ (the trace of a $1\times1$ matrix is just its entry). And
+\[
+xx^Txx^T = x\,(x^Tx)\,x^T = \|x\|^2\,xx^T \quad\Longrightarrow\quad \tr(xx^Txx^T) = \|x\|^2\tr(xx^T) = \|x\|^2\cdot\|x\|^2 = \|x\|^4,
+\]
+using $\tr(xx^T)=x^Tx=\|x\|^2$. Putting it together:
+\[
+\|A-xx^T\|_F^2 = \tr(A^2) - 2x^TAx + \|x\|^4 \qquad\Longrightarrow\qquad f(x) = \tfrac12\tr(A^2) - x^TAx + \tfrac12\|x\|^4.
+\]
+
+\textbf{Specialize to $A=x_0x_0^T$:} $\tr(A^2) = \tr(x_0x_0^Tx_0x_0^T) = \|x_0\|^2\tr(x_0x_0^T) = \|x_0\|^2\cdot\|x_0\|^2 = \|x_0\|^4$. And $x^TAx = x^Tx_0x_0^Tx = (x_0^Tx)(x_0^Tx) = (x_0^Tx)^2$ (since $x^Tx_0$ and $x_0^Tx$ are the same scalar). So:
+\[
+f(x) = \tfrac12\|x_0\|^4 - (x_0^Tx)^2 + \tfrac12\|x\|^4.
+\]
+
+\section*{Part (a) --- Is the problem convex?}
+
+Test along $x = s\,u_0$ where $u_0 := x_0/\|x_0\|$ (unit vector) and $s\in\R$. Then $x_0^Tx = s\,x_0^Tu_0 = s\|x_0\|$, and $\|x\|^2=s^2$, so:
+\[
+f(su_0) = \tfrac12\|x_0\|^4 - s^2\|x_0\|^2 + \tfrac12s^4.
+\]
+Differentiate twice with respect to $s$:
+\[
+\frac{d}{ds}f(su_0) = -2s\|x_0\|^2+2s^3, \qquad \frac{d^2}{ds^2}f(su_0) = -2\|x_0\|^2+6s^2.
+\]
+At $s=0$: $\frac{d^2}{ds^2}f(su_0)\big|_{s=0} = -2\|x_0\|^2 < 0$ (since $x_0\ne0$). A function with negative second derivative at a point is locally concave there --- the opposite of what convexity requires. \textbf{So $f$ is not convex, and the problem is not a convex optimization problem.}
+
+\section*{Part (b) --- Find all stationary points}
+
+\subsection*{Step 1 --- Compute the gradient}
+
+Work with $f(x) = \tfrac12\tr(A^2) - x^TAx + \tfrac12\|x\|^4$ directly (the general form before specializing, since the gradient formula is cleaner this way).
+
+\textbf{Gradient of $x^TAx$:} write $x^TAx = \sum_i\sum_j x_iA_{ij}x_j$. Differentiate with respect to one coordinate $x_k$:
+\[
+\frac{\partial}{\partial x_k}\Big(\sum_i\sum_j x_iA_{ij}x_j\Big) = \sum_j A_{kj}x_j + \sum_i x_iA_{ik} = (Ax)_k + (A^Tx)_k = 2(Ax)_k,
+\]
+using $A^T=A$ (given symmetric). So $\nabla(x^TAx) = 2Ax$.
+
+\textbf{Gradient of $\|x\|^4$:} $\|x\|^4 = (x^Tx)^2$. By the chain rule, $\nabla\big[(x^Tx)^2\big] = 2(x^Tx)\cdot\nabla(x^Tx) = 2\|x\|^2\cdot 2x = 4\|x\|^2x$, so $\nabla(\tfrac12\|x\|^4) = 2\|x\|^2x$.
+
+Combining:
+\[
+\nabla f(x) = -2Ax + 2\|x\|^2x = 2\big(\|x\|^2I - A\big)x.
+\]
+
+\subsection*{Step 2 --- Set the gradient to zero}
+
+\[
+\nabla f(x) = 0 \quad\Longleftrightarrow\quad Ax = \|x\|^2x.
+\]
+So either $x=0$, or $x$ is an eigenvector of $A$ with eigenvalue exactly $\|x\|^2$.
+
+\subsection*{Step 3 --- The eigenstructure of $A=x_0x_0^T$}
+
+For any $v\in\R^n$: $Av = x_0(x_0^Tv)$. Two cases:
+\begin{itemize}[leftmargin=1.5em]
+\item If $v\perp x_0$ (i.e.\ $x_0^Tv=0$): $Av=0$. So every vector orthogonal to $x_0$ is an eigenvector with eigenvalue $0$ --- this eigenspace has dimension $n-1$.
+\item If $v=x_0$: $Ax_0 = x_0(x_0^Tx_0) = \|x_0\|^2x_0$. So $x_0$ is an eigenvector with eigenvalue $\|x_0\|^2$.
+\end{itemize}
+These two eigenspaces (dimension $n-1$ and dimension $1$) together span all of $\R^n$, so this is the complete eigenstructure of $A$: eigenvalue $0$ (multiplicity $n-1$) and eigenvalue $\|x_0\|^2$ (multiplicity $1$).
+
+\subsection*{Step 4 --- Solve $Ax=\|x\|^2x$ using this structure}
+
+\textbf{Case $x=0$:} trivially satisfies the equation ($0=0$). \textbf{Stationary point.}
+
+\textbf{Case $x\ne0$ in the $0$-eigenspace} ($x\perp x_0$): then $Ax=0$, so the equation becomes $0=\|x\|^2x$. Since $x\ne0$, $\|x\|^2\ne0$, so this forces $0\ne0$ --- a contradiction. \textbf{No solutions here.}
+
+\textbf{Case $x = c\,x_0$ for some scalar $c\ne0$:} then $Ax = c\,Ax_0 = c\|x_0\|^2x_0$. We need this to equal $\|x\|^2x = \|cx_0\|^2(cx_0) = c^3\|x_0\|^2x_0$. Matching: $c\|x_0\|^2x_0 = c^3\|x_0\|^2x_0 \Rightarrow c=c^3 \Rightarrow c(1-c^2)=0$. Since $c\ne0$, this forces $c^2=1$, i.e.\ $c=\pm1$. \textbf{Stationary points: $x=x_0$ and $x=-x_0$.}
+
+\textbf{Case $x = c\,x_0+w$, with $c\ne0$ and $w\perp x_0$, $w\ne0$ (a genuinely mixed vector):} then $x_0^Tx = c\|x_0\|^2$ (since $x_0^Tw=0$), so $Ax = x_0(x_0^Tx) = c\|x_0\|^2x_0$ --- this has \emph{no component along $w$}. But the right-hand side of the stationary equation, $\|x\|^2x = \|x\|^2(cx_0+w)$, \emph{does} have a component along $w$ (namely $\|x\|^2w$), since $w\ne0$ and $\|x\|^2\ne0$ (as $x\ne0$). Since $x_0$ and $w$ are linearly independent, the two sides can't match unless that $w$-component vanishes --- but it doesn't. \textbf{No solutions here.}
+
+\subsection*{Conclusion of Part (b)}
+
+\[
+\boxed{\text{Stationary points: } x=0,\ x=x_0,\ x=-x_0.}
+\]
+
+\section*{Part (c) --- Is every local optimum a global optimum?}
+
+\subsection*{Step 1 --- Evaluate $f$ at $x_0$ and $-x_0$}
+
+Recall from the preliminary remark: $f(x)\ge0$ always, with $f(x)=0$ exactly when $xx^T=A$. Check: $x_0x_0^T = A$ exactly (that's literally how $A$ was defined), so $f(x_0)=0$. Similarly $(-x_0)(-x_0)^T = x_0x_0^T = A$, so $f(-x_0)=0$ too. Since $f\ge0$ everywhere and these points achieve the value $0$ --- the smallest value $f$ can possibly take --- \textbf{$x_0$ and $-x_0$ are global minima} (hence automatically local minima too, with no further calculus needed).
+
+\subsection*{Step 2 --- Evaluate $f$ at $0$}
+
+\[
+f(0) = \tfrac12\|x_0\|^4 - 0 + 0 = \tfrac12\|x_0\|^4 > 0
+\]
+(strictly positive since $x_0\ne0$). This is \emph{not} the global minimum value ($0$), so $x=0$ is not a global minimum. But is it perhaps still a local minimum?
+
+\subsection*{Step 3 --- Check whether $x=0$ is even a local minimum}
+
+\textbf{Direction 1: along $u_0=x_0/\|x_0\|$.} From Part (a):
+\[
+f(su_0) - f(0) = \big[\tfrac12\|x_0\|^4 - s^2\|x_0\|^2+\tfrac12s^4\big] - \tfrac12\|x_0\|^4 = s^2\Big(\tfrac12s^2 - \|x_0\|^2\Big).
+\]
+For small $|s|$ (specifically $|s|<\sqrt2\,\|x_0\|$), the bracket $\big(\tfrac12s^2-\|x_0\|^2\big)$ is negative, so $f(su_0)-f(0) < 0$ for small $s\ne0$. \textbf{$f$ strictly decreases moving away from $0$ in the $u_0$ direction.}
+
+\textbf{Direction 2: along a unit vector $w\perp x_0$.} Then $x_0^T(sw) = s(x_0^Tw) = 0$, so:
+\[
+f(sw) = \tfrac12\|x_0\|^4 - 0 + \tfrac12\|sw\|^4 = \tfrac12\|x_0\|^4+\tfrac12s^4 = f(0) + \tfrac12s^4 \ge f(0).
+\]
+\textbf{$f$ strictly increases moving away from $0$ in any direction orthogonal to $x_0$.}
+
+So $f$ decreases in one direction from $0$ and increases in another --- this is precisely the signature of a \textbf{saddle point}, not a local minimum (a local minimum would require $f$ to not decrease in \emph{any} direction). \textbf{$x=0$ is not a local minimum of $f$.}
+
+\subsection*{Conclusion of Part (c)}
+
+The complete list of stationary points is $\{0,x_0,-x_0\}$. Of these: $x_0$ and $-x_0$ are global minima (Step 1), and $0$ is not a local minimum at all (Step 3) --- it's a saddle point, so it doesn't count as a ``local optimum'' that could fail to be global. Since every point that \emph{is} a local minimum among the stationary points turns out to already be a global minimum, and there are no other candidates to check:
+\[
+\textbf{Yes --- every local optimum of this problem is a global optimum.} \qquad\blacksquare
+\]
+
+\end{document}

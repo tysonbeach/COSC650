@@ -1,0 +1,147 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\usepackage{parskip}
+
+\newcommand{\R}{\mathbb{R}}
+
+\title{Problem 3 --- Full Walkthrough\\ \large Stationary points of $x^2+y^2+\beta xy+x+2y$}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\textbf{Goal:} For each value of the scalar $\beta$, find every stationary point of
+\[
+f(x,y) = x^2+y^2+\beta xy+x+2y, \qquad (x,y)\in\R^2,
+\]
+and determine which ones (if any) are global minima.
+
+\section*{Step 1 --- Write $f$ in matrix quadratic form}
+
+Let $v=(x,y)$, $M = \begin{pmatrix}2 & \beta \\ \beta & 2\end{pmatrix}$, $c=(1,2)$. Claim: $f(v) = \tfrac12 v^TMv + c^Tv$. Check by expanding:
+\[
+\tfrac12 v^TMv = \tfrac12\big(2x^2+2\beta xy+2y^2\big) = x^2+\beta xy+y^2, \qquad c^Tv = x+2y.
+\]
+Adding these gives $x^2+\beta xy+y^2+x+2y$, which matches $f(x,y)$ exactly. So $f(v)=\tfrac12v^TMv+c^Tv$ --- the same general quadratic pattern as an unconstrained quadratic optimization problem, with this particular $M$ and $c$.
+
+\section*{Step 2 --- Gradient and the stationary-point system}
+
+For a quadratic function of this form, $\nabla f(v) = Mv+c$ (this can be checked directly, coordinate by coordinate):
+\[
+\frac{\partial f}{\partial x} = 2x+\beta y+1, \qquad \frac{\partial f}{\partial y} = \beta x+2y+2.
+\]
+Setting $\nabla f=0$ gives $Mv=-c$, i.e.\ the linear system
+\[
+2x+\beta y = -1, \qquad \beta x+2y=-2.
+\]
+
+\section*{Step 3 --- Solve the system (general $\beta$)}
+
+Eliminate $y$: multiply the first equation by $2$ and the second by $\beta$:
+\[
+4x+2\beta y = -2, \qquad \beta^2x+2\beta y = -2\beta.
+\]
+Subtracting:
+\[
+(4-\beta^2)\,x = -2-(-2\beta) = 2\beta-2 \quad\Longrightarrow\quad x^\star = \frac{2(\beta-1)}{4-\beta^2}, \quad \text{provided } 4-\beta^2\ne 0.
+\]
+Eliminate $x$ similarly: multiply the first equation by $\beta$ and the second by $2$:
+\[
+2\beta x+\beta^2y=-\beta, \qquad 2\beta x+4y=-4.
+\]
+Subtracting:
+\[
+(\beta^2-4)\,y = -\beta-(-4) = 4-\beta \quad\Longrightarrow\quad y^\star = \frac{4-\beta}{\beta^2-4} = \frac{\beta-4}{4-\beta^2}.
+\]
+So whenever $4-\beta^2\ne0$ (i.e.\ $\beta\ne\pm2$), there is a unique stationary point:
+\[
+x^\star = \frac{2(\beta-1)}{4-\beta^2}, \qquad y^\star = \frac{\beta-4}{4-\beta^2}.
+\]
+
+\section*{Step 4 --- Eigenvalues and eigenvectors of $M$}
+
+Test the vectors $v_1=(1,1)$ and $v_2=(1,-1)$ directly:
+\[
+Mv_1 = \begin{pmatrix}2+\beta\\ \beta+2\end{pmatrix} = (2+\beta)v_1, \qquad Mv_2 = \begin{pmatrix}2-\beta\\ \beta-2\end{pmatrix} = (2-\beta)v_2.
+\]
+So $v_1,v_2$ are eigenvectors of $M$ with eigenvalues $2+\beta$ and $2-\beta$ respectively. Note $v_1\cdot v_2 = 1-1=0$: they are orthogonal, and since $\R^2$ is $2$-dimensional, $\{v_1,v_2\}$ is a complete orthogonal basis --- these are \emph{all} the eigenvalues of $M$, no others exist.
+
+\section*{Step 5 --- An explicit test for definiteness}
+
+Any vector $v\in\R^2$ can be written as $v=c_1v_1+c_2v_2$. Since $Mv_1=(2+\beta)v_1$ and $Mv_2=(2-\beta)v_2$:
+\[
+v^TMv = (c_1v_1+c_2v_2)^T\big(c_1(2+\beta)v_1+c_2(2-\beta)v_2\big).
+\]
+Expanding, and using $v_1\cdot v_2=0$, $v_1\cdot v_1=v_2\cdot v_2=2$:
+\[
+v^TMv = 2c_1^2(2+\beta) + 2c_2^2(2-\beta).
+\]
+This single formula tells us everything about $M$'s definiteness as $\beta$ varies:
+\begin{itemize}[leftmargin=1.5em]
+\item If $-2<\beta<2$: both $(2+\beta)>0$ and $(2-\beta)>0$, so $v^TMv>0$ for every nonzero $v$ (some $c_1$ or $c_2$ must be nonzero). \textbf{$M$ is positive definite.}
+\item If $\beta=2$: $v^TMv = 4c_1^2 \ge 0$, with equality whenever $c_1=0$ (i.e.\ $v$ is any multiple of $v_2$) --- \textbf{$M$ is positive semidefinite, not definite.}
+\item If $\beta=-2$: symmetric situation, $v^TMv=4c_2^2\ge0$, equality when $v$ is a multiple of $v_1$ --- \textbf{positive semidefinite, not definite.}
+\item If $|\beta|>2$: $(2+\beta)$ and $(2-\beta)$ have opposite signs, so $v^TMv$ is positive for $v=v_1$ alone and negative for $v=v_2$ alone --- \textbf{$M$ is indefinite.}
+\end{itemize}
+
+\section*{Step 6 --- Case analysis}
+
+\paragraph{Case $|\beta|<2$.} From Step 3, the unique stationary point $(x^\star,y^\star)$ exists. From Step 5, $M\succ0$ everywhere (it's constant, so this holds globally, not just at $(x^\star,y^\star)$) --- $f$ is strictly convex. A stationary point of a strictly convex function is its unique global minimum. \textbf{$(x^\star,y^\star)$ is the unique global minimum.}
+
+\paragraph{Case $\beta=2$.} The system from Step 2 becomes
+\[
+2x+2y=-1, \qquad 2x+2y=-2.
+\]
+Subtracting the two equations gives $0=1$ --- a contradiction. \textbf{No stationary point exists.} To see $f$ is unbounded below, move along the direction $v_2=(1,-1)$ (the null eigenvector) starting from the origin: $v=(t,-t)$. Using $f(v)=\tfrac12v^TMv+c^Tv$ and Step 5's formula with $c_1=0,c_2=t$ (since $(t,-t)=t\cdot v_2$):
+\[
+\tfrac12v^TMv = \tfrac12\cdot 2t^2(2-\beta) = t^2(2-2) = 0, \qquad c^Tv = (1,2)\cdot(t,-t) = t-2t=-t.
+\]
+So $f(t,-t) = 0 + (-t) = -t \to -\infty$ as $t\to\infty$. \textbf{Unbounded below.}
+
+\paragraph{Case $\beta=-2$.} The system becomes
+\[
+2x-2y=-1, \qquad -2x+2y=-2.
+\]
+Adding the two equations gives $0=-3$ --- a contradiction. \textbf{No stationary point exists.} Move along $v_1=(1,1)$: $v=(t,t)$, so $c_1=t,c_2=0$:
+\[
+\tfrac12v^TMv = \tfrac12\cdot 2t^2(2+\beta) = t^2(2-2)=0, \qquad c^Tv=(1,2)\cdot(t,t)=3t.
+\]
+So $f(t,t) = 3t \to -\infty$ as $t\to-\infty$. \textbf{Unbounded below.}
+
+\paragraph{Case $|\beta|>2$.} From Step 3, the unique stationary point $(x^\star,y^\star)$ still exists (since $4-\beta^2\ne0$). From Step 5, $M$ is indefinite: $(x^\star,y^\star)$ is a \textbf{saddle point}, not a local minimum.
+
+To confirm $f$ is unbounded below, use the exact quadratic expansion around the stationary point. Since $f$ is quadratic, its Taylor expansion around any point is exact with no remainder:
+\[
+f(v^\star+w) = f(v^\star) + \nabla f(v^\star)^Tw + \tfrac12 w^TMw.
+\]
+At the stationary point, $\nabla f(v^\star)=0$, so the linear term vanishes entirely:
+\[
+f(v^\star+w) = f(v^\star) + \tfrac12w^TMw.
+\]
+Take $w = t\cdot v_2 = (t,-t)$, the eigenvector for the \emph{negative} eigenvalue when $\beta>2$ (since $2-\beta<0$ there):
+\[
+f(v^\star+tv_2) = f(v^\star) + \tfrac12\cdot 2t^2(2-\beta) = f(v^\star) + t^2(2-\beta) \to -\infty \text{ as } t\to\infty,
+\]
+since $(2-\beta)<0$. (For $\beta<-2$, use $w=t\cdot v_1$ instead, since then $2+\beta<0$ is the negative eigenvalue; the same computation gives $f(v^\star+tv_1) = f(v^\star)+t^2(2+\beta)\to-\infty$.) \textbf{Unbounded below; no global minimum exists.}
+
+\section*{Summary}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Range of $\beta$} & \textbf{Stationary points} & \textbf{Classification} \\
+\hline
+$-2<\beta<2$ & unique: $(x^\star,y^\star)$ from Step 3 & unique global minimum \\
+$\beta=2$ & none & unbounded below \\
+$\beta=-2$ & none & unbounded below \\
+$|\beta|>2$ & unique: $(x^\star,y^\star)$ from Step 3 & saddle point; unbounded below \\
+\hline
+\end{tabular}
+\end{center}
+
+A global minimum exists --- and is the unique stationary point --- exactly when $|\beta|<2$. In every other case, $\inf f = -\infty$.
+
+\end{document}

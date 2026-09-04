@@ -1,0 +1,185 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\usepackage{parskip}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\tr}{\operatorname{tr}}
+
+\title{Problem 6 --- Full Walkthrough\\ \large General rank-one matrix factorization}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\textbf{Setup:} Let $A = x_0y_0^T \ne 0$ be a rank-one matrix, $x_0,y_0\in\R^n$ (note $A\ne0$ forces \emph{both} $x_0\ne0$ and $y_0\ne0$). Consider
+\[
+f(x,y) := \tfrac12\|A-xy^T\|_F^2, \qquad x,y\in\R^n.
+\]
+
+\textbf{A fact we'll use throughout:} as in Problem 5, $f(x,y)\ge0$ always, with $f(x,y)=0$ exactly when $xy^T=A$.
+
+\section*{Step 1 --- Expand $f(x,y)$ into a usable formula}
+
+Unlike Problem 5, $xy^T$ is not symmetric in general, so use the fully general Frobenius identity $\|M\|_F^2=\tr(M^TM)$:
+\[
+\|A-xy^T\|_F^2 = \tr\big((A-xy^T)^T(A-xy^T)\big) = \tr(A^TA) - \tr(A^Txy^T) - \tr\big((xy^T)^TA\big) + \tr\big((xy^T)^T(xy^T)\big).
+\]
+Handle each term. First, using the cyclic property of trace:
+\[
+\tr(A^Txy^T) = \tr(y^TA^Tx) = y^TA^Tx = x^TAy
+\]
+(the last step because a $1\times1$ matrix equals its own transpose: $y^TA^Tx = (y^TA^Tx)^T = x^TAy$). Similarly:
+\[
+\tr\big((xy^T)^TA\big) = \tr(yx^TA) = \tr(x^TAy) = x^TAy.
+\]
+So together, $-\tr(A^Txy^T)-\tr((xy^T)^TA) = -2x^TAy$. For the last term:
+\[
+(xy^T)^T(xy^T) = yx^Txy^T = (x^Tx)\,yy^T = \|x\|^2yy^T \quad\Longrightarrow\quad \tr\big((xy^T)^T(xy^T)\big) = \|x\|^2\tr(yy^T) = \|x\|^2\|y\|^2.
+\]
+Putting it together (and using $\tr(A^TA)=\|A\|_F^2$):
+\[
+f(x,y) = \tfrac12\|A\|_F^2 - x^TAy + \tfrac12\|x\|^2\|y\|^2.
+\]
+
+\textbf{Specialize to $A=x_0y_0^T$:} $\|A\|_F^2 = \tr(A^TA) = \tr(y_0x_0^Tx_0y_0^T) = \|x_0\|^2\tr(y_0y_0^T) = \|x_0\|^2\|y_0\|^2$. And $x^TAy = x^Tx_0y_0^Ty = (x_0^Tx)(y_0^Ty)$. So:
+\[
+f(x,y) = \tfrac12\|x_0\|^2\|y_0\|^2 - (x_0^Tx)(y_0^Ty) + \tfrac12\|x\|^2\|y\|^2.
+\]
+
+\section*{Part (a) --- Is the problem convex?}
+
+Test along $x=s\,u_0$, $y=s\,v_0$ (moving both variables together), where $u_0:=x_0/\|x_0\|$, $v_0:=y_0/\|y_0\|$ are unit vectors, and let $C:=\|x_0\|\|y_0\|>0$. Then $x_0^Tx = s\|x_0\|$, $y_0^Ty=s\|y_0\|$, $\|x\|^2=\|y\|^2=s^2$:
+\[
+f(su_0,sv_0) = \tfrac12C^2 - s^2C + \tfrac12s^4.
+\]
+This is exactly $\tfrac12(C-s^2)^2$ (check: $\tfrac12(C-s^2)^2 = \tfrac12C^2 - Cs^2+\tfrac12s^4$ --- matches). Differentiate twice:
+\[
+\frac{d}{ds}\Big[\tfrac12(C-s^2)^2\Big] = -2s(C-s^2), \qquad \frac{d^2}{ds^2}\Big[\tfrac12(C-s^2)^2\Big] = -2C+6s^2.
+\]
+At $s=0$: the second derivative is $-2C<0$. \textbf{So $f$ is locally concave at $(0,0)$ along this line --- $f$ is not convex, and the problem is not a convex optimization problem.}
+
+\section*{Part (b) --- Find all stationary points}
+
+\subsection*{Step 1 --- Compute the gradients}
+
+Work with $f(x,y) = \tfrac12\|A\|_F^2 - x^TAy+\tfrac12\|x\|^2\|y\|^2$ (general form). Note $x^TAy$ is \emph{bilinear} (linear in $x$ for fixed $y$, and linear in $y$ for fixed $x$) --- not quadratic like Problem 5's $x^TAx$, so no factor of $2$ appears here.
+
+\textbf{Gradient of $x^TAy$ with respect to $x$:} write $x^TAy=\sum_i\sum_jx_iA_{ij}y_j$. Treating $y$ as fixed and differentiating with respect to $x_k$:
+\[
+\frac{\partial}{\partial x_k}\Big(\sum_i\sum_jx_iA_{ij}y_j\Big) = \sum_j A_{kj}y_j = (Ay)_k \quad\Longrightarrow\quad \nabla_x(x^TAy) = Ay.
+\]
+\textbf{Gradient with respect to $y$:} differentiating the same sum with respect to $y_k$ (now treating $x$ fixed):
+\[
+\frac{\partial}{\partial y_k}\Big(\sum_i\sum_jx_iA_{ij}y_j\Big) = \sum_i x_iA_{ik} = (A^Tx)_k \quad\Longrightarrow\quad \nabla_y(x^TAy) = A^Tx.
+\]
+\textbf{Gradients of $\tfrac12\|x\|^2\|y\|^2$:} since $\|y\|^2$ is a constant with respect to $x$ (and vice versa):
+\[
+\nabla_x\big(\tfrac12\|x\|^2\|y\|^2\big) = \|y\|^2x, \qquad \nabla_y\big(\tfrac12\|x\|^2\|y\|^2\big) = \|x\|^2y.
+\]
+Combining:
+\[
+\nabla_xf = -Ay+\|y\|^2x, \qquad \nabla_yf = -A^Tx+\|x\|^2y.
+\]
+
+\subsection*{Step 2 --- Set both gradients to zero}
+
+\[
+Ay = \|y\|^2x \qquad\text{(I)}, \qquad\qquad A^Tx = \|x\|^2y \qquad\text{(II)}.
+\]
+With $A=x_0y_0^T$ (so $A^T=y_0x_0^T$): $Ay = x_0(y_0^Ty)$ and $A^Tx=y_0(x_0^Tx)$. So the system becomes:
+\[
+(y_0^Ty)\,x_0 = \|y\|^2x \qquad\text{(I)}, \qquad\qquad (x_0^Tx)\,y_0 = \|x\|^2y \qquad\text{(II)}.
+\]
+
+\subsection*{Step 3 --- Case $x=0$}
+
+Equation (II) becomes $0 = \|0\|^2y = 0$, automatically true regardless of $y$. Equation (I) becomes $(y_0^Ty)x_0 = \|y\|^2\cdot 0 = 0$. Since $x_0\ne0$, this forces $y_0^Ty=0$, i.e.\ $y\perp y_0$ (this includes $y=0$ as a special case). \textbf{Stationary points: $\{(0,y): y\perp y_0\}$.}
+
+\subsection*{Step 4 --- Case $y=0$}
+
+By the symmetric argument (swap the roles of the two equations): (I) is automatic, and (II) forces $x_0^Tx=0$. \textbf{Stationary points: $\{(x,0): x\perp x_0\}$.}
+
+\subsection*{Step 5 --- Case $x\ne0$ and $y\ne0$}
+
+Since $y\ne0$, $\|y\|^2\ne0$, so equation (I) can be solved explicitly for $x$:
+\[
+x = \frac{y_0^Ty}{\|y\|^2}\,x_0.
+\]
+So $x$ is automatically a scalar multiple of $x_0$; call the scalar $\lambda := (y_0^Ty)/\|y\|^2$, so $x=\lambda x_0$. Since we're in the case $x\ne0$ and $x_0\ne0$, we need $\lambda\ne0$.
+
+Since $x\ne0$, $\|x\|^2\ne0$, so equation (II) can likewise be solved explicitly for $y$:
+\[
+y = \frac{x_0^Tx}{\|x\|^2}\,y_0.
+\]
+Substitute $x=\lambda x_0$: $x_0^Tx = \lambda\|x_0\|^2$ and $\|x\|^2=\lambda^2\|x_0\|^2$, so
+\[
+y = \frac{\lambda\|x_0\|^2}{\lambda^2\|x_0\|^2}\,y_0 = \frac{1}{\lambda}\,y_0.
+\]
+So for every $\lambda\ne0$, the pair $(x,y) = (\lambda x_0,\ y_0/\lambda)$ satisfies both (I) and (II) --- direct substitution confirms this closes the loop consistently. \textbf{Stationary points: $\{(\lambda x_0,\ y_0/\lambda) : \lambda\ne0\}$.}
+
+Notice: $xy^T = (\lambda x_0)(y_0/\lambda)^T = \lambda\cdot\tfrac1\lambda\cdot x_0y_0^T = x_0y_0^T = A$ \emph{exactly}, for every one of these points. So this entire family achieves $f=0$.
+
+\subsection*{Conclusion of Part (b)}
+
+\[
+\boxed{\text{Stationary points: } \{(0,y):y\perp y_0\} \ \cup\ \{(x,0):x\perp x_0\} \ \cup\ \{(\lambda x_0,\,y_0/\lambda):\lambda\ne0\}.}
+\]
+
+\section*{Part (c) --- Show every local optimum is a global optimum}
+
+\subsection*{Step 1 --- The third family are global minima}
+
+Every point in $\{(\lambda x_0,y_0/\lambda):\lambda\ne0\}$ satisfies $xy^T=A$ exactly (Step 5 above), so $f=0$ there --- the smallest value $f$ can take anywhere (since $f\ge0$ always). \textbf{These are global minima}, hence automatically local minima too.
+
+\subsection*{Step 2 --- The degenerate families are not local minima}
+
+Take a point $(0,\bar y)$ with $\bar y\perp y_0$ (this covers the first family; the second is symmetric). Its value:
+\[
+f(0,\bar y) = \tfrac12\|x_0\|^2\|y_0\|^2 - 0 + 0 = \tfrac12\|x_0\|^2\|y_0\|^2 > 0
+\]
+(strictly positive, since $x_0,y_0\ne0$) --- not the global minimum value $0$, so not a global minimum. We show it isn't even a \emph{local} minimum, by exhibiting a joint perturbation of both $x$ and $y$ that strictly decreases $f$.
+
+Perturb $x=\varepsilon x_0$, $y = \bar y+\delta y_0$, for small $\varepsilon,\delta$. Compute each piece of $f$:
+\[
+x_0^Tx = \varepsilon\|x_0\|^2, \qquad y_0^Ty = y_0^T\bar y+\delta\|y_0\|^2 = \delta\|y_0\|^2
+\]
+(using $y_0^T\bar y=0$). So the middle term of $f$:
+\[
+(x_0^Tx)(y_0^Ty) = \varepsilon\delta\,\|x_0\|^2\|y_0\|^2.
+\]
+For the last term of $f$: $\|x\|^2=\varepsilon^2\|x_0\|^2$, and
+\[
+\|y\|^2 = \|\bar y+\delta y_0\|^2 = \|\bar y\|^2 + 2\delta(y_0^T\bar y) + \delta^2\|y_0\|^2 = \|\bar y\|^2+\delta^2\|y_0\|^2
+\]
+(again using $y_0^T\bar y=0$). So:
+\[
+f(\varepsilon x_0,\bar y+\delta y_0) = \tfrac12\|x_0\|^2\|y_0\|^2 \;-\; \varepsilon\delta\|x_0\|^2\|y_0\|^2 \;+\; \tfrac12\varepsilon^2\|x_0\|^2\big(\|\bar y\|^2+\delta^2\|y_0\|^2\big).
+\]
+
+\subsection*{Step 3 --- Choose $\delta$ proportional to $\varepsilon$ to force a decrease}
+
+Set $\delta = k\varepsilon$ for a constant $k$ to be chosen. Substituting:
+\[
+f(\varepsilon x_0,\bar y+k\varepsilon y_0) = \tfrac12\|x_0\|^2\|y_0\|^2 \;+\; \varepsilon^2\underbrace{\Big[-k\|x_0\|^2\|y_0\|^2+\tfrac12\|x_0\|^2\|\bar y\|^2\Big]}_{\text{coefficient of }\varepsilon^2} \;+\; \underbrace{\tfrac12\varepsilon^4k^2\|x_0\|^2\|y_0\|^2}_{O(\varepsilon^4),\text{ negligible for small }\varepsilon}.
+\]
+Choose $k$ large enough that the bracketed coefficient is negative:
+\[
+-k\|x_0\|^2\|y_0\|^2+\tfrac12\|x_0\|^2\|\bar y\|^2 < 0 \quad\Longleftrightarrow\quad k > \frac{\|\bar y\|^2}{2\|y_0\|^2}
+\]
+--- always achievable, just pick such a $k$ (e.g.\ $k = \|\bar y\|^2/\|y_0\|^2+1$). With this $k$ fixed, for sufficiently small $\varepsilon>0$ the $\varepsilon^2\times(\text{negative})$ term dominates the $O(\varepsilon^4)$ term, so:
+\[
+f(\varepsilon x_0,\bar y+k\varepsilon y_0) < \tfrac12\|x_0\|^2\|y_0\|^2 = f(0,\bar y).
+\]
+\textbf{This exhibits points arbitrarily close to $(0,\bar y)$ where $f$ is strictly smaller --- so $(0,\bar y)$ is not a local minimum}, for any $\bar y\perp y_0$ (including $\bar y=0$). The symmetric argument (swap the roles of $x,y$ and $x_0,y_0$) shows every point $(\bar x,0)$ with $\bar x\perp x_0$ is likewise not a local minimum.
+
+\subsection*{Conclusion of Part (c)}
+
+Every stationary point found in Part (b) falls into one of two categories: the family $\{(\lambda x_0,y_0/\lambda):\lambda\ne0\}$, which are all global minima (Step 1); or the degenerate families $\{(0,y):y\perp y_0\}\cup\{(x,0):x\perp x_0\}$, which are not local minima at all (Step 2--3), so they don't count as ``local optima'' that could fail to be global. Since every point that actually qualifies as a local minimum is already a global minimum:
+\[
+\textbf{Every local optimum of this problem is a global optimum.} \qquad\blacksquare
+\]
+
+\end{document}

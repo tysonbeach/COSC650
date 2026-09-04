@@ -1,0 +1,113 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\usepackage{parskip}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\tr}{\operatorname{tr}}
+
+\title{Problem 2(b) --- Full Walkthrough\\ \large $\exp\big((\sigma_1(AX))^{10}\big)$ is convex}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\textbf{Goal:} Let $\sigma_1(Z)$ denote the largest singular value of a matrix $Z$. Show that
+\[
+f(X) = \exp\Big( \big(\sigma_1(AX)\big)^{10} \Big)
+\]
+is convex in $X$.
+
+\textbf{Strategy:} Write $f(X) = h(g(X))$ with $g(X) = \sigma_1(AX)$ (the ``inner'' piece) and $h(t) = \exp(t^{10})$ (the ``outer'' piece). Show $g$ is convex, show $h$ is convex and nondecreasing on the range $g$ actually takes, then prove a composition rule --- directly from the definition, the same way we proved the affine-composition rule in 2(a) --- that combines the two facts into convexity of $f$.
+
+\section*{Step 1 --- Recognize the structure}
+
+Define
+\[
+g(X) := \sigma_1(AX), \qquad h(t) := \exp(t^{10}).
+\]
+Then $f(X) = h(g(X))$: first apply the linear map $X \mapsto AX$ and take its largest singular value, then feed that number into $h$.
+
+\section*{Step 2 --- $\sigma_1(Z)$ is a norm, hence convex}
+
+Recall the variational definition of the largest singular value:
+\[
+\sigma_1(Z) = \sup_{\|u\|=\|v\|=1} u^TZv.
+\]
+
+\textbf{Homogeneity:} for any scalar $\alpha$, replacing $u$ with $-u$ doesn't change the constraint $\|u\|=1$, so the supremum over $u,v$ is unchanged if we flip the sign of the quantity being maximized. This gives
+\[
+\sigma_1(\alpha Z) = \sup_{\|u\|=\|v\|=1} u^T(\alpha Z)v = |\alpha| \sup_{\|u\|=\|v\|=1} u^TZv = |\alpha|\,\sigma_1(Z).
+\]
+
+\textbf{Triangle inequality:} since a supremum of a sum is at most the sum of the suprema,
+\[
+\sigma_1(Z+W) = \sup_{u,v} u^T(Z+W)v = \sup_{u,v}\big[u^TZv + u^TWv\big] \le \sup_{u,v} u^TZv + \sup_{u,v} u^TWv = \sigma_1(Z)+\sigma_1(W).
+\]
+
+\textbf{Nonnegativity:} $\sigma_1(Z)\ge 0$ always, with equality only when $Z=0$.
+
+So $\sigma_1(\cdot)$ satisfies all three norm axioms --- it \emph{is} a norm (the spectral norm). \textbf{Any norm is convex:} for $\theta\in[0,1]$,
+\[
+\sigma_1\big(\theta Z + (1-\theta)W\big) \;\le\; \sigma_1(\theta Z) + \sigma_1\big((1-\theta)W\big) \;=\; \theta\,\sigma_1(Z) + (1-\theta)\,\sigma_1(W),
+\]
+using the triangle inequality first, then homogeneity (valid since $\theta,(1-\theta)\ge 0$, so $|\theta|=\theta$). This is exactly the definition of convexity. So $\sigma_1(\cdot)$ is convex, and $\sigma_1(Z) \ge 0$ for every $Z$.
+
+\section*{Step 3 --- $g(X) = \sigma_1(AX)$ is convex}
+
+This is the same ``convex outer function precomposed with a linear map'' pattern as 2(a) Step 2, just with $b=0$ (the map $X \mapsto AX$ is linear, a special case of affine). Take any $X, Y$ and $\theta\in[0,1]$:
+\[
+g(\theta X+(1-\theta)Y) = \sigma_1\big(A(\theta X+(1-\theta)Y)\big) = \sigma_1\big(\theta(AX) + (1-\theta)(AY)\big) \le \theta\,\sigma_1(AX) + (1-\theta)\,\sigma_1(AY),
+\]
+using linearity of $A$ in the middle step and convexity of $\sigma_1$ (Step 2) in the last. That's exactly $g(\theta X+(1-\theta)Y) \le \theta g(X)+(1-\theta)g(Y)$: \textbf{$g$ is convex.} And since $g(X)=\sigma_1(AX)$ is a norm value, $g(X)\ge 0$ for every $X$.
+
+\section*{Step 4 --- $h(t)=\exp(t^{10})$ is convex, and nondecreasing for $t\ge 0$}
+
+Differentiate:
+\[
+h'(t) = 10\,t^9\,e^{t^{10}}.
+\]
+For $t \ge 0$: $t^9 \ge 0$ and $e^{t^{10}} > 0$, so $h'(t) \ge 0$ --- \textbf{$h$ is nondecreasing on $[0,\infty)$.} (For $t<0$, $t^9<0$, so $h$ is actually decreasing there --- but we only care about $t\ge 0$, since that's the only range $g$ ever produces.)
+
+Differentiate again, using the product rule on $h'(t) = 10t^9 e^{t^{10}}$:
+\[
+h''(t) = 90\,t^8\,e^{t^{10}} \;+\; 10t^9 \cdot e^{t^{10}}\cdot 10t^9 \;=\; e^{t^{10}}\big(90\,t^8 + 100\,t^{18}\big).
+\]
+Both $t^8$ and $t^{18}$ are even powers, so they're $\ge 0$ for \emph{every} real $t$ (not just $t\ge0$), and $e^{t^{10}}>0$ always. So $h''(t) \ge 0$ for all $t \in \R$: \textbf{$h$ is convex everywhere.}
+
+\section*{Step 5 --- The composition rule, proved directly}
+
+\textbf{Claim:} if $g$ is convex with $g(X) \ge 0$ for all $X$, and $h$ is convex and nondecreasing on $[0,\infty)$, then $f(X) := h(g(X))$ is convex.
+
+\textbf{Proof:} Take any $X, Y$ and $\theta \in [0,1]$. Let $s := g(X) \ge 0$ and $t := g(Y) \ge 0$.
+
+By convexity of $g$:
+\[
+g(\theta X + (1-\theta)Y) \;\le\; \theta s + (1-\theta) t.
+\]
+Both sides of this inequality are $\ge 0$ (the left because $g$ only outputs nonnegative values; the right because it's a convex combination of the nonnegative numbers $s,t$). Since $h$ is \emph{nondecreasing} on $[0,\infty)$, applying $h$ to both sides of a true inequality between two nonnegative numbers preserves the inequality direction:
+\[
+h\big(g(\theta X+(1-\theta)Y)\big) \;\le\; h\big(\theta s + (1-\theta)t\big).
+\]
+Now apply convexity of $h$ to the right-hand side:
+\[
+h(\theta s + (1-\theta)t) \;\le\; \theta\,h(s) + (1-\theta)\,h(t) \;=\; \theta\,h(g(X)) + (1-\theta)\,h(g(Y)) \;=\; \theta f(X) + (1-\theta) f(Y).
+\]
+Chaining the two inequalities together:
+\[
+f(\theta X + (1-\theta)Y) \;=\; h\big(g(\theta X+(1-\theta)Y)\big) \;\le\; \theta f(X) + (1-\theta) f(Y).
+\]
+This is exactly the definition of $f$ being convex. $\blacksquare$
+
+\emph{Note where each hypothesis was used:} convexity of $g$ produced the first inequality; \textbf{nondecreasing}-ness of $h$ was needed to legally push $h$ through that inequality without flipping it; convexity of $h$ produced the second inequality. Drop any one of the three hypotheses and the chain breaks.
+
+\section*{Step 6 --- Conclude}
+
+From Step 3, $g(X)=\sigma_1(AX)$ is convex with $g(X)\ge 0$ always. From Step 4, $h(t)=\exp(t^{10})$ is convex, and nondecreasing on $[0,\infty)$ --- exactly the range $g$ produces. The composition rule from Step 5 then applies directly:
+\[
+f(X) = h(g(X)) = \exp\big((\sigma_1(AX))^{10}\big) \quad \text{is convex.} \qquad \blacksquare
+\]
+
+\end{document}

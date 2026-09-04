@@ -1,0 +1,201 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\usepackage{parskip}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\tr}{\operatorname{tr}}
+
+\title{COSC 594/650 --- Homework 1 Walkthrough\\ \large (Study notes, not a submission)}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Problem 1 --- Convex optimization}
+
+Minimize $e^{x_1}+e^{x_2}+\cdots+e^{x_n}$ subject to $x_1+x_2+\cdots+x_n=\gamma$.
+
+\subsection*{(a) Convexity}
+Each term $e^{x_i}$ is the composition of the convex, increasing function $t\mapsto e^t$ with the affine map $x \mapsto x_i$, hence convex; a sum of convex functions is convex. The constraint set $\{x : \sum_i x_i = \gamma\}$ is an affine subspace, hence convex. Minimizing a convex function over a convex set is a convex problem. $\blacksquare$
+
+\subsection*{(b) Eliminating the constraint}
+Substituting $x_n = \gamma - x_1 - \cdots - x_{n-1}$ gives the unconstrained problem in $(x_1,\dots,x_{n-1})\in\R^{n-1}$:
+\[
+h(x_1,\dots,x_{n-1}) = e^{x_1}+\cdots+e^{x_{n-1}} + e^{\gamma - x_1 - \cdots - x_{n-1}}.
+\]
+
+\subsection*{(c) Global optimum}
+$h$ is still a sum of exponentials of affine functions, hence convex, so any stationary point is global. Setting $\partial h/\partial x_i = 0$ for $i=1,\dots,n-1$:
+\[
+e^{x_i} - e^{\gamma - x_1-\cdots-x_{n-1}} = e^{x_i}-e^{x_n} = 0 \implies x_i = x_n.
+\]
+So all coordinates are equal at the stationary point; combined with $\sum_i x_i = \gamma$, this gives $x_i = \gamma/n$ for all $i$. This is the unique global minimizer, with optimal value $n\,e^{\gamma/n}$.
+
+\subsection*{(d) AM--GM inequality}
+Given any $(y_1,\dots,y_n)\in\R^n_{+}$, set $x_i = \ln y_i$ and $\gamma := \sum_i \ln y_i = \ln\big(\prod_i y_i\big)$. This $x$ is feasible for the problem in (a)--(c). Since the global minimum value of $\sum_i e^{x_i}$ over that feasible set is $n e^{\gamma/n}$, feasibility of this $x$ gives
+\[
+\sum_i y_i = \sum_i e^{x_i} \;\ge\; n e^{\gamma/n} = n\Big(\prod_i y_i\Big)^{1/n}.
+\]
+Dividing by $n$:
+\[
+\frac{1}{n}\sum_{i=1}^n y_i \;\ge\; \left(\prod_{i=1}^n y_i\right)^{1/n}, \qquad \forall\,(y_1,\dots,y_n)\in\R^n_{+}.
+\]
+This is AM--GM, obtained directly from the result of (a)--(c). $\blacksquare$
+
+\section*{Problem 2 --- Convexity proofs}
+
+\subsection*{(a)}
+Let $f(x) = \log\Big(e^{a_1^Tx+b_1}+\cdots+e^{a_n^Tx+b_n}\Big) = g(Ax+b)$, where $g(z)=\log\sum_i e^{z_i}$ is the \emph{log-sum-exp} function and $A$ has rows $a_i^T$. Composing a convex function with an affine map preserves convexity, so it suffices to show $g$ is convex.
+
+Let $p(z)$ be the softmax of $z$: $p_i(z) = e^{z_i}/\sum_j e^{z_j}$. Then
+\[
+\nabla g(z) = p, \qquad \nabla^2 g(z) = \operatorname{diag}(p) - pp^T.
+\]
+For any $v\in\R^n$,
+\[
+v^T\nabla^2 g(z)\,v = \sum_i p_i v_i^2 - \Big(\sum_i p_i v_i\Big)^2 = \operatorname{Var}_p(v) \ge 0,
+\]
+treating $p$ as a probability distribution over the values $v_1,\dots,v_n$ (this is exactly $\mathbb{E}_p[v^2]-(\mathbb{E}_p[v])^2\ge0$). So $\nabla^2 g \succeq 0$ everywhere, $g$ is convex, and hence $f$ is convex. $\blacksquare$
+
+\subsection*{(b)}
+Let $\sigma_1(Z)$ denote the largest singular value of $Z$ (the spectral norm), a matrix norm and hence convex and nonnegative. The function $g(X) := \sigma_1(AX)$ is convex in $X$, being the composition of the convex function $\sigma_1(\cdot)$ with the linear map $X\mapsto AX$; and $g(X)\ge0$ always.
+
+Write $f(X) = h(g(X))$ with $h(t) = \exp(t^{10})$. We only need $h$ restricted to $[0,\infty)$, the range of $g$. There,
+\[
+h'(t) = 10\,t^{9}\exp(t^{10}) \ge 0 \quad\text{for } t\ge0,
+\]
+so $h$ is convex and nondecreasing on $[0,\infty)$. By the composition rule (h convex nondecreasing on the range of $g$, $g$ convex $\implies h\circ g$ convex), $f$ is convex. $\blacksquare$
+
+\section*{Problem 3 --- Stationary points}
+
+Let $f(x,y) = x^2+y^2+\beta xy + x + 2y$ on $\R^2$. Setting $\nabla f = 0$:
+\[
+2x+\beta y = -1, \qquad \beta x + 2y = -2.
+\]
+This is a linear system with matrix $M=\begin{pmatrix}2&\beta\\ \beta&2\end{pmatrix}$, $\det M = 4-\beta^2$. Since $f$ is quadratic, its Hessian is exactly $M$ (constant), with eigenvalues $2+\beta$ and $2-\beta$ (eigenvectors $(1,1)$ and $(1,-1)$, since the diagonal entries are equal).
+
+\paragraph{Case $|\beta|<2$.} $\det M \ne 0$; by Cramer's rule,
+\[
+x^\star = \frac{2(\beta-1)}{4-\beta^2}, \qquad y^\star = \frac{\beta-4}{4-\beta^2}.
+\]
+Both eigenvalues $2\pm\beta$ are positive, so $M\succ0$ everywhere, $f$ is strictly convex, and $(x^\star,y^\star)$ is the unique \textbf{global minimum}.
+
+\paragraph{Case $\beta = 2$.} The system becomes $2x+2y=-1$ and $2x+2y=-2$ --- inconsistent, so \textbf{no stationary points exist}. Consistently, $f$ is unbounded below: along $(x,y)=(t,-t)$,
+\[
+f(t,-t) = 2t^2-2t^2+t-2t = -t \longrightarrow -\infty \text{ as } t\to\infty.
+\]
+
+\paragraph{Case $\beta=-2$.} Similarly inconsistent; along $(t,t)$, $f(t,t)=3t\to-\infty$ as $t\to-\infty$. No stationary points.
+
+\paragraph{Case $|\beta|>2$.} $\det M\ne0$ again, so the same point $(x^\star,y^\star)$ from Cramer's rule is stationary --- but now one eigenvalue of $M$ is negative, so the Hessian is indefinite: this is a \textbf{saddle point}, not a local minimum. $f$ is unbounded below along the negative-eigenvalue direction, so no global minimum exists.
+
+\paragraph{Summary.} A global minimum exists --- and is the unique stationary point --- exactly when $|\beta|<2$. For $|\beta|\ge2$, $\inf f = -\infty$.
+
+\section*{Problem 4 --- Linewise local minima}
+
+\subsection*{(a)}
+Fix $d\in\R^n$ and let $g(\alpha) = f(x^\star+\alpha d)$. By the chain rule, $g'(\alpha)=\nabla f(x^\star+\alpha d)^Td$, so $g'(0)=\nabla f(x^\star)^Td$. Since $g$ has a local minimum at the interior point $\alpha=0$ and $f$ is differentiable, $g'(0)=0$. This holds for every $d\in\R^n$, so $\nabla f(x^\star)^Td=0$ for all $d$; taking $d=\nabla f(x^\star)$ gives $\|\nabla f(x^\star)\|^2=0$, i.e.\ $\nabla f(x^\star)=0$. $\blacksquare$
+
+\subsection*{(b)}
+Let $f(y,z) = (z-py^2)(z-qy^2)$ with $0<p<q$. Consider $(0,0)$.
+
+\emph{Along any line} $(y,z)=(\alpha a,\alpha b)$:
+\[
+g(\alpha) = f(\alpha a,\alpha b) = (\alpha b - p\alpha^2a^2)(\alpha b - q\alpha^2 a^2).
+\]
+\begin{itemize}[leftmargin=1.5em]
+\item If $a=0$: $g(\alpha)=(\alpha b)^2\ge0$, a strict global minimum at $\alpha=0$.
+\item If $b\ne0$: $g(\alpha)=\alpha^2\big[(b-p\alpha a^2)(b-q\alpha a^2)\big]$, and the bracket $\to b^2>0$ as $\alpha\to0$, so it stays positive for small $\alpha$. Hence $g(\alpha)>0=g(0)$ near $0$: a strict local minimum.
+\item If $b=0,\ a\ne0$: $g(\alpha)=pq\,a^4\alpha^4\ge0$, minimized at $\alpha=0$.
+\end{itemize}
+So $(0,0)$ is a strict local minimum of $f$ along \emph{every} line through it.
+
+\emph{But $(0,0)$ is not a local minimum of $f$ overall.} Take $p<m<q$ and the parabola $z=my^2$:
+\[
+f(y,my^2) = (my^2-py^2)(my^2-qy^2) = y^4(m-p)(m-q).
+\]
+Since $m-p>0$ and $m-q<0$, this is strictly negative for every $y\ne0$, while $f(0,0)=0$. As $y\to0$, the points $(y,my^2)\to(0,0)$ while $f<0$ there --- so every neighborhood of the origin contains points with $f$ strictly less than $f(0,0)$. Hence $(0,0)$ is \textbf{not} a local minimum, despite appearing to be one along every straight line: the parabola is tangent to every line through the origin, so no single line detects the dip.
+
+\section*{Problem 5 --- Symmetric rank-one matrix approximation}
+
+Let $A = x_0x_0^T \ne 0$. Expanding,
+\[
+f(x) = \tfrac12\|A-xx^T\|_F^2 = \tfrac12\|A\|_F^2 - x^TAx + \tfrac12\|x\|^4,
+\]
+using $\tr(Axx^T)=x^TAx$ and $\|xx^T\|_F^2=\tr(xx^Txx^T)=\|x\|^4$.
+
+\subsection*{(a) Convexity}
+No. Along $x=su_0$ with $u_0=x_0/\|x_0\|$:
+\[
+f(su_0) = \tfrac12\|A\|_F^2 - s^2\|x_0\|^2 + \tfrac12 s^4,
+\]
+whose second derivative at $s=0$ is $-2\|x_0\|^2<0$: $f$ is locally concave there, so it is not convex.
+
+\subsection*{(b) Stationary points}
+$\nabla f(x) = -2Ax+2\|x\|^2x = 2(\|x\|^2I - A)x$. Setting this to zero:
+\[
+Ax = \|x\|^2 x,
+\]
+so $x=0$, or $x$ is an eigenvector of $A$ with eigenvalue $\|x\|^2$. Since $A=x_0x_0^T$ has eigenvalue $\|x_0\|^2$ (eigenvector $x_0$) and eigenvalue $0$ with multiplicity $n-1$ (eigenspace $x_0^\perp$):
+\begin{itemize}[leftmargin=1.5em]
+\item In the $0$-eigenspace: $Ax=0$ forces $\|x\|^2x=0\Rightarrow x=0$.
+\item Along $x_0$: $x=cu_0$ needs $c^2=\|x_0\|^2\Rightarrow c=\pm\|x_0\|$, giving $x=\pm x_0$.
+\item Vectors with both an $x_0$-component and an orthogonal component cannot satisfy the equation unless the orthogonal part vanishes.
+\end{itemize}
+\textbf{Stationary points:} $x=0,\ x=x_0,\ x=-x_0$.
+
+\subsection*{(c) Local vs.\ global optima}
+$f(x_0)=f(-x_0)=\tfrac12\|x_0\|^4-\|x_0\|^4+\tfrac12\|x_0\|^4=0$. Since $f\ge0$ always with equality iff $xx^T=A$, these achieve the \textbf{global minimum} (value $0$).
+
+$f(0)=\tfrac12\|A\|_F^2=\tfrac12\|x_0\|^4>0$. Along $x=\varepsilon u_0$: $f=\tfrac12\|x_0\|^4-\varepsilon^2\|x_0\|^2+O(\varepsilon^4)$, which \emph{decreases} as $\varepsilon$ moves away from $0$ --- so $x=0$ is a \textbf{saddle point}, not a local minimum.
+
+The only local minima are $\pm x_0$, and both are global. \textbf{Yes: every local optimum is a global optimum.} (This is the classical ``no spurious local minima'' landscape for rank-one PCA-type factorization.)
+
+\section*{Problem 6 --- General rank-one factorization}
+
+Let $A=x_0y_0^T\ne0$ (not necessarily symmetric). Expanding,
+\[
+f(x,y) = \tfrac12\|A\|_F^2 - x^TAy + \tfrac12\|x\|^2\|y\|^2.
+\]
+
+\subsection*{(a) Convexity}
+No. Even in the scalar case $n=1$, $f(x,y)=\tfrac12(a-xy)^2$ is a ``double-well'' quartic along $x=y=t$, manifestly nonconvex.
+
+\subsection*{(b) Stationary points}
+\[
+\nabla_xf = -Ay+\|y\|^2x = 0, \qquad \nabla_yf = -A^Tx+\|x\|^2y = 0.
+\]
+With $A=x_0y_0^T$: $Ay=(y_0^Ty)x_0$ and $A^Tx=(x_0^Tx)y_0$, so the conditions become
+\[
+(y_0^Ty)\,x_0 = \|y\|^2x, \qquad (x_0^Tx)\,y_0 = \|x\|^2y.
+\]
+\begin{itemize}[leftmargin=1.5em]
+\item If $x=0$: the second equation is automatic; the first forces $y_0^Ty=0$, i.e.\ $y\perp y_0$. So $\{x=0,\ y\perp y_0\}$ are all stationary.
+\item Symmetrically, $\{y=0,\ x\perp x_0\}$ are all stationary.
+\item If $x,y\ne0$: the equations force $x\parallel x_0$ and $y\parallel y_0$ (otherwise one side has a component the other lacks). Writing $x=\lambda x_0,\ y=\mu y_0$ and substituting back, both equations reduce to $\lambda\mu=1$. So for any $\lambda\ne0$, $(x,y)=(\lambda x_0,\ y_0/\lambda)$ is stationary --- and
+\[
+xy^T = \lambda x_0\cdot\tfrac1\lambda y_0^T = x_0y_0^T = A \quad\text{exactly},
+\]
+so $f=0$ on this entire family: every such point is already a perfect factorization.
+\end{itemize}
+\textbf{Stationary set:} $\{x=0,\,y\perp y_0\}\ \cup\ \{y=0,\,x\perp x_0\}\ \cup\ \{(\lambda x_0,\lambda^{-1}y_0): \lambda\ne0\}$.
+
+\subsection*{(c) Every local optimum is global}
+The third family already achieves $f=0$, the global minimum (since $f\ge0$ with equality iff $xy^T=A$) --- trivially global optima.
+
+Consider a degenerate stationary point $(0,\bar y)$ with $y_0^T\bar y=0$, where $f(0,\bar y)=\tfrac12\|A\|_F^2>0$. Perturb $x=\varepsilon x_0,\ y=\bar y+\delta y_0$:
+\[
+f(\varepsilon x_0,\ \bar y+\delta y_0) = \tfrac12\|A\|_F^2 - \varepsilon\delta\,\|x_0\|^2\|y_0\|^2 + \tfrac12\varepsilon^2\|x_0\|^2\big(\|\bar y\|^2+\delta^2\|y_0\|^2\big),
+\]
+using $y_0^T\bar y=0$ to kill a cross term. Set $\delta = k\varepsilon$ for a constant $k$ large enough that
+\[
+-k\|x_0\|^2\|y_0\|^2 + \tfrac12\|x_0\|^2\|\bar y\|^2 \;<\; 0
+\]
+(always achievable). Then for small $\varepsilon>0$, $f(\varepsilon x_0,\bar y+k\varepsilon y_0) = \tfrac12\|A\|_F^2 + (\text{negative})\,\varepsilon^2 + O(\varepsilon^3)$, strictly less than $f(0,\bar y)$. So $(0,\bar y)$ is not a local minimum --- it is a saddle. The symmetric argument handles $\{y=0,\ x\perp x_0\}$.
+
+Every stationary point is therefore either in the global-minimizer family (value $0$) or a saddle (not a local minimum at all). Hence \textbf{every local optimum is a global optimum.} $\blacksquare$ This is the archetypal ``benign nonconvex landscape'' result underlying why gradient-based methods succeed on matrix factorization problems despite nonconvexity.
+
+\end{document}

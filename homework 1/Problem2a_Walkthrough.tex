@@ -1,0 +1,145 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\usepackage{parskip}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\tr}{\operatorname{tr}}
+
+\title{Problem 2(a) --- Full Walkthrough\\ \large Log-sum-exp is convex}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\textbf{Goal:} Show that
+\[
+f(x) = \log\Big( e^{a_1^Tx+b_1} + e^{a_2^Tx+b_2} + \cdots + e^{a_n^Tx+b_n} \Big)
+\]
+is convex, where each $a_i$ is a vector and $b_i$ is a scalar.
+
+\textbf{Strategy:} Split this into an ``outer'' log-sum-exp function and an ``inner'' affine map. Show the outer piece is convex on its own, then argue that plugging affine expressions into a convex function preserves convexity.
+
+\section*{Step 1 --- Recognize the structure}
+
+Each $a_i^Tx+b_i$ is an affine function of $x$. Stack them: let $A$ be the matrix whose rows are $a_1^T, a_2^T, \dots, a_n^T$, and $b=(b_1,\dots,b_n)$. Then
+\[
+Ax+b = (a_1^Tx+b_1,\ a_2^Tx+b_2,\ \dots,\ a_n^Tx+b_n).
+\]
+Define $g$, taking any vector $z=(z_1,\dots,z_n)$:
+\[
+g(z) = \log\big(e^{z_1}+e^{z_2}+\cdots+e^{z_n}\big) \qquad \text{(the \emph{log-sum-exp} function)}.
+\]
+With this, $f(x) = g(Ax+b)$: apply the affine map $x\mapsto Ax+b$, then feed the result into $g$.
+
+\section*{Step 2 --- Why ``convex $g$, affine input'' gives convex $f$}
+
+Suppose $g$ is convex. Take any $x,y$ and $\theta\in[0,1]$. Let $u=Ax+b$, $v=Ay+b$ --- two full vectors, not coordinates of one vector.
+
+Because $Ax+b$ is affine, it distributes over convex combinations:
+\begin{align*}
+A(\theta x+(1-\theta)y)+b
+  &= \theta(Ax)+(1-\theta)(Ay)+b &&\text{[linearity of $A$]}\\
+  &= \theta(Ax)+(1-\theta)(Ay)+\theta b+(1-\theta) b &&\text{[since $\theta+(1-\theta)=1$, split $b$]}\\
+  &= \theta(Ax+b)+(1-\theta)(Ay+b)\\
+  &= \theta u+(1-\theta)v.
+\end{align*}
+So
+\[
+f(\theta x+(1-\theta)y) = g(\theta u+(1-\theta)v) \;\le\; \theta g(u)+(1-\theta)g(v) \;=\; \theta f(x)+(1-\theta)f(y),
+\]
+using convexity of $g$ in the middle step, and $g(u)=f(x)$, $g(v)=f(y)$ in the last. That's exactly the definition of $f$ convex. So: \textbf{if $g$ is convex, $f=g(Ax+b)$ is automatically convex too}, regardless of $A,b$.
+
+\section*{Step 3 --- Compute the gradient of $g$}
+
+Let $S(z) := e^{z_1}+e^{z_2}+\cdots+e^{z_n}$, so $g(z)=\log(S(z))$. By the chain rule (log outer, $S$ inner):
+\[
+\frac{\partial g}{\partial z_i} = \frac{1}{S(z)}\cdot\frac{\partial S}{\partial z_i} = \frac{1}{S(z)}\cdot e^{z_i} = \frac{e^{z_i}}{S(z)}.
+\]
+Define the \textbf{softmax}:
+\[
+p_i(z) := \frac{e^{z_i}}{S(z)}, \qquad i=1,\dots,n.
+\]
+Each $p_i(z)>0$, and they sum to 1:
+\[
+p_1+p_2+\cdots+p_n = \frac{e^{z_1}+\cdots+e^{z_n}}{S(z)} = \frac{S(z)}{S(z)} = 1.
+\]
+So $p(z)=(p_1,\dots,p_n)$ is a probability distribution, and
+\[
+\nabla g(z) = p(z).
+\]
+
+\section*{Step 4 --- Compute the Hessian of $g$}
+
+Differentiate $p_i(z)=e^{z_i}/S(z)$ again, via the quotient rule.
+
+\textbf{Diagonal entries} (differentiate $p_i$ w.r.t.\ $z_i$ again):
+\[
+\frac{\partial p_i}{\partial z_i}
+= \frac{e^{z_i}\,S(z) - e^{z_i}\cdot e^{z_i}}{S(z)^2}
+= \frac{e^{z_i}\big(S(z)-e^{z_i}\big)}{S(z)^2}
+= p_i(1-p_i).
+\]
+
+\textbf{Off-diagonal entries} (differentiate $p_i$ w.r.t.\ a different variable $z_j$, $j\ne i$):
+\[
+\frac{\partial p_i}{\partial z_j} = \frac{0\cdot S(z) - e^{z_i}\cdot e^{z_j}}{S(z)^2} = -p_ip_j.
+\]
+
+So the Hessian matrix is:
+\[
+\nabla^2 g(z) =
+\begin{pmatrix}
+p_1(1-p_1) & -p_1p_2 & \cdots & -p_1p_n \\
+-p_2p_1 & p_2(1-p_2) & \cdots & -p_2p_n \\
+\vdots & \vdots & \ddots & \vdots \\
+-p_np_1 & -p_np_2 & \cdots & p_n(1-p_n)
+\end{pmatrix}
+\;=\; \operatorname{diag}(p) - pp^T,
+\]
+where $\operatorname{diag}(p)$ is the diagonal matrix with $p_1,\dots,p_n$ on the diagonal, and $pp^T$ is the outer product of $p$ with itself:
+\[
+\operatorname{diag}(p) =
+\begin{pmatrix}
+p_1 & 0 & \cdots & 0 \\
+0 & p_2 & \cdots & 0 \\
+\vdots & & \ddots & \vdots \\
+0 & 0 & \cdots & p_n
+\end{pmatrix},
+\qquad
+pp^T =
+\begin{pmatrix}
+p_1p_1 & p_1p_2 & \cdots & p_1p_n \\
+p_2p_1 & p_2p_2 & \cdots & p_2p_n \\
+\vdots & \vdots & \ddots & \vdots \\
+p_np_1 & p_np_2 & \cdots & p_np_n
+\end{pmatrix}.
+\]
+Subtracting: the diagonal of $\operatorname{diag}(p)-pp^T$ is $p_i - p_i^2 = p_i(1-p_i)$ (matches), and the off-diagonal entries are $0 - p_ip_j = -p_ip_j$ (matches).
+
+\section*{Step 5 --- Show the Hessian is positive semidefinite}
+
+Take any vector $v=(v_1,\dots,v_n)$ (a fresh test vector, unrelated to the $v=Ay+b$ from Step 2). Compute $v^T\nabla^2g(z)\,v$:
+\begin{align*}
+v^T\nabla^2g(z)\,v
+&= \sum_i p_i(1-p_i)v_i^2 \;-\; \sum_{i\ne j} p_ip_j\,v_iv_j \\
+&= \sum_i p_iv_i^2 \;-\; \sum_i p_i^2v_i^2 \;-\; \sum_{i\ne j}p_ip_j\,v_iv_j \\
+&= \sum_i p_iv_i^2 \;-\; \Big(\sum_i p_iv_i\Big)^2,
+\end{align*}
+since $\sum_i p_i^2v_i^2 + \sum_{i\ne j}p_ip_jv_iv_j$ is exactly the expansion of $\big(\sum_i p_iv_i\big)^2$.
+
+Since $p$ is a probability distribution, treating $v_1,\dots,v_n$ as values with probabilities $p_1,\dots,p_n$:
+\[
+v^T\nabla^2g(z)\,v = \mathbb E_p[v^2] - \big(\mathbb E_p[v]\big)^2 = \operatorname{Var}_p(v) \;\ge\; 0,
+\]
+since variance is never negative --- it's an average of squared deviations from the mean.
+
+So $\nabla^2g(z)\succeq 0$ for every $z$: the second-order condition for $g$ to be convex.
+
+\section*{Step 6 --- Conclude}
+
+$g$ is convex (Step 5), and $f(x)=g(Ax+b)$ is a convex function composed with an affine map, which is convex (Step 2). Therefore $f$ is convex. $\blacksquare$
+
+\end{document}

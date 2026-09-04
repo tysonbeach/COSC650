@@ -1,0 +1,182 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\tr}{\operatorname{tr}}
+
+\newtheorem*{solution}{Solution}
+
+\title{COSC 594/650: Optimization for Machine Learning\\Homework 1 --- Solutions}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Problem 1 (Convex optimization)}
+
+Consider
+\[
+\text{minimize}_x \quad e^{x_1}+\cdots+e^{x_n} \qquad \text{subject to} \quad x_1+\cdots+x_n=\gamma.
+\]
+
+\subsection*{(a)}
+\begin{solution}
+Each $e^{x_i}$ is the convex function $t\mapsto e^t$ precomposed with the affine map $x\mapsto x_i$, hence convex; a sum of convex functions is convex, so the objective is convex. The feasible set $\{x:\mathbf 1^Tx=\gamma\}$ is an affine subspace, hence convex. Therefore the problem is convex.
+\end{solution}
+
+\subsection*{(b)}
+\begin{solution}
+Substituting $x_n=\gamma-x_1-\cdots-x_{n-1}$ gives the equivalent unconstrained problem in $(x_1,\dots,x_{n-1})\in\R^{n-1}$:
+\[
+h(x_1,\dots,x_{n-1}) = e^{x_1}+\cdots+e^{x_{n-1}}+e^{\gamma-x_1-\cdots-x_{n-1}}.
+\]
+\end{solution}
+
+\subsection*{(c)}
+\begin{solution}
+$h$ is a sum of exponentials of affine functions, hence convex, so any stationary point of $h$ is a global minimizer. For $i=1,\dots,n-1$,
+\[
+\frac{\partial h}{\partial x_i} = e^{x_i}-e^{\gamma-x_1-\cdots-x_{n-1}} = e^{x_i}-e^{x_n}.
+\]
+Setting this to zero and using strict monotonicity of $e^t$ gives $x_i=x_n$ for every $i$. Combined with the constraint $\sum_ix_i=\gamma$, this forces $x_i=\gamma/n$ for all $i$. So the (unique) global minimum of the original problem is
+\[
+x_1=x_2=\cdots=x_n=\frac{\gamma}{n}, \qquad \text{optimal value } n\,e^{\gamma/n}.
+\]
+\end{solution}
+
+\subsection*{(d)}
+\begin{solution}
+Fix $(y_1,\dots,y_n)\in\R^n_+$. Set $x_i:=\ln y_i$ and $\gamma:=\sum_i\ln y_i=\ln\!\big(\prod_iy_i\big)$; then $x=(x_1,\dots,x_n)$ is feasible for the constrained problem above. By part (c), the global minimum value $ne^{\gamma/n}$ lower-bounds the objective at every feasible point, in particular at this $x$:
+\[
+\sum_ie^{x_i} \ge n\,e^{\gamma/n} \quad\Longrightarrow\quad \sum_iy_i \ge n\Big(\prod_iy_i\Big)^{1/n}.
+\]
+Dividing by $n$:
+\[
+\frac1n\sum_{i=1}^ny_i \;\ge\; \Big(\prod_{i=1}^ny_i\Big)^{1/n}, \qquad\forall\,(y_1,\dots,y_n)\in\R^n_+,
+\]
+with equality iff $x$ is itself the minimizer of part (c), i.e.\ iff $y_1=\cdots=y_n$. $\blacksquare$
+\end{solution}
+
+\section*{Problem 2 (Convexity proofs)}
+
+\subsection*{(a)}
+Show $f(x)=\log\big(e^{a_1^Tx+b_1}+\cdots+e^{a_n^Tx+b_n}\big)$ is convex.
+\begin{solution}
+Let $A$ have rows $a_1^T,\dots,a_n^T$, $b=(b_1,\dots,b_n)$, and $g(z):=\log\sum_ie^{z_i}$ (log-sum-exp), so $f(x)=g(Ax+b)$. Let $p_i(z):=e^{z_i}/\sum_je^{z_j}$ (softmax); then $\nabla g(z)=p(z)$ and $\nabla^2g(z)=\operatorname{diag}(p)-pp^T$. For any $v\in\R^n$,
+\[
+v^T\nabla^2g(z)v = \sum_ip_iv_i^2-\Big(\sum_ip_iv_i\Big)^2 = \operatorname{Var}_p(v)\ge0,
+\]
+since $p$ is a probability distribution. So $\nabla^2g\succeq0$ everywhere: $g$ is convex. Since composing a convex function with an affine map preserves convexity, $f(x)=g(Ax+b)$ is convex. $\blacksquare$
+\end{solution}
+
+\subsection*{(b)}
+Let $\sigma_1(Z)$ denote the largest singular value of $Z$. Show $f(X)=\exp\big((\sigma_1(AX))^{10}\big)$ is convex.
+\begin{solution}
+$\sigma_1(\cdot)=\sup_{\|u\|=\|v\|=1}u^TZv$ satisfies the norm axioms (homogeneity and the triangle inequality follow directly from this variational form), so it is a norm, hence convex and nonnegative. Thus $g(X):=\sigma_1(AX)$, a convex function precomposed with the linear map $X\mapsto AX$, is convex, with $g(X)\ge0$.
+
+Let $h(t):=\exp(t^{10})$. Then $h'(t)=10t^9e^{t^{10}}\ge0$ for $t\ge0$, so $h$ is nondecreasing on $[0,\infty)$; and $h''(t)=e^{t^{10}}(90t^8+100t^{18})\ge0$ for all $t\in\R$, so $h$ is convex.
+
+For $g$ convex with $g\ge0$, and $h$ convex and nondecreasing on $[0,\infty)$: given $X,Y$ and $\theta\in[0,1]$, let $s=g(X)\ge0,\,t=g(Y)\ge0$. Convexity of $g$ gives $g(\theta X+(1-\theta)Y)\le\theta s+(1-\theta)t$; applying the nondecreasing $h$ to both sides preserves the inequality, and convexity of $h$ then gives
+\[
+h\big(g(\theta X+(1-\theta)Y)\big) \le h(\theta s+(1-\theta)t) \le \theta h(s)+(1-\theta)h(t) = \theta f(X)+(1-\theta)f(Y).
+\]
+So $f=h\circ g$ is convex. $\blacksquare$
+\end{solution}
+
+\section*{Problem 3 (Stationary points)}
+
+For each $\beta$, find all stationary points of $f(x,y)=x^2+y^2+\beta xy+x+2y$ on $\R^2$, and determine which are global minima.
+
+\begin{solution}
+Write $f(v)=\tfrac12v^TMv+c^Tv$ with $v=(x,y)$, $M=\begin{pmatrix}2&\beta\\\beta&2\end{pmatrix}$, $c=(1,2)$ (direct expansion confirms this matches $f$). Then $\nabla f(v)=Mv+c$, so stationary points solve $Mv=-c$:
+\[
+2x+\beta y=-1, \qquad \beta x+2y=-2.
+\]
+Eliminating variables gives, whenever $4-\beta^2\ne0$, the unique solution
+\[
+x^\star=\frac{2(\beta-1)}{4-\beta^2}, \qquad y^\star=\frac{\beta-4}{4-\beta^2}.
+\]
+The vectors $v_1=(1,1)$, $v_2=(1,-1)$ satisfy $Mv_1=(2+\beta)v_1$, $Mv_2=(2-\beta)v_2$; they are orthogonal and span $\R^2$, so these are the only eigenvalues of $M$. Writing $v=c_1v_1+c_2v_2$,
+\[
+v^TMv = 2c_1^2(2+\beta)+2c_2^2(2-\beta).
+\]
+
+\textbf{Case $-2<\beta<2$:} both $(2+\beta),(2-\beta)>0$, so $M\succ0$ everywhere; $f$ is strictly convex, and $(x^\star,y^\star)$ is the unique global minimum.
+
+\textbf{Case $\beta=2$:} the system becomes $2x+2y=-1$ and $2x+2y=-2$, inconsistent, so no stationary point exists. Along $(x,y)=(t,-t)$: $f(t,-t)=-t\to-\infty$ as $t\to\infty$; unbounded below.
+
+\textbf{Case $\beta=-2$:} the system is inconsistent similarly; along $(t,t)$: $f(t,t)=3t\to-\infty$ as $t\to-\infty$; unbounded below.
+
+\textbf{Case $|\beta|>2$:} $(x^\star,y^\star)$ still exists ($4-\beta^2\ne0$), but $M$ is indefinite (one of $2\pm\beta$ is negative), so it is a saddle point. Since $\nabla f(v^\star)=0$ and $f$ is quadratic, $f(v^\star+w)=f(v^\star)+\tfrac12w^TMw$ exactly; taking $w$ along the negative-eigenvalue eigenvector drives $f\to-\infty$.
+
+\textbf{Conclusion:} a global minimum exists --- and is the unique stationary point $(x^\star,y^\star)$ --- exactly when $|\beta|<2$. For $|\beta|\ge2$, $\inf f=-\infty$. $\blacksquare$
+\end{solution}
+
+\section*{Problem 4 (Linewise local minima)}
+
+Let $f:\R^n\to\R$ be differentiable and suppose $x^\star$ is a local minimum of $f$ along every line through $x^\star$: $g(\alpha):=f(x^\star+\alpha d)$ has a local minimum at $\alpha=0$ for every $d\in\R^n$.
+
+\subsection*{(a)}
+\begin{solution}
+Fix $d\in\R^n$. By the chain rule, $g'(\alpha)=\nabla f(x^\star+\alpha d)^Td$, so $g'(0)=\nabla f(x^\star)^Td$. Since $g$ has a local minimum at the interior point $\alpha=0$, $g'(0)=0$; hence $\nabla f(x^\star)^Td=0$. As $d$ was arbitrary, this holds for all $d\in\R^n$; taking $d=\nabla f(x^\star)$ gives $\|\nabla f(x^\star)\|^2=0$, so $\nabla f(x^\star)=0$. $\blacksquare$
+\end{solution}
+
+\subsection*{(b)}
+\begin{solution}
+Let $0<p<q$ and $f(y,z)=(z-py^2)(z-qy^2)$; take $x^\star=(0,0)$.
+
+\emph{Linewise minimum.} For $(y,z)=(\alpha a,\alpha b)$: if $a=0$, $g(\alpha)=(\alpha b)^2\ge0$; if $a,b\ne0$, $g(\alpha)=\alpha^2\big[(b-p\alpha a^2)(b-q\alpha a^2)\big]$, and the bracket $\to b^2>0$ as $\alpha\to0$, so $g(\alpha)\ge0$ near $0$; if $a\ne0,b=0$, $g(\alpha)=pq\,a^4\alpha^4\ge0$. In all cases $g(\alpha)\ge g(0)=0$ near $\alpha=0$: $(0,0)$ is a local minimum of $f$ along every line through it.
+
+\emph{Not an actual local minimum.} For $p<m<q$, along $z=my^2$:
+\[
+f(y,my^2) = y^4(m-p)(m-q) < 0 \quad\text{for } y\ne0
+\]
+(since $m-p>0,\,m-q<0$), while $f(0,0)=0$. So every neighborhood of $(0,0)$ contains points with strictly smaller $f$-value: $(0,0)$ is not a local minimum of $f$. $\blacksquare$
+\end{solution}
+
+\section*{Problem 5 (Symmetric rank-one matrix approximation)}
+
+Let $A=x_0x_0^T\ne0$, $x_0\in\R^n$. Consider $f(x)=\tfrac12\|A-xx^T\|_F^2$.
+
+\begin{solution}
+Expanding via $\|M\|_F^2=\tr(M^TM)$: $f(x) = \tfrac12\|x_0\|^4-(x_0^Tx)^2+\tfrac12\|x\|^4$, and $f\ge0$ always with equality iff $xx^T=A$.
+
+\textbf{(a)} Along $x=su_0$, $u_0=x_0/\|x_0\|$: $f(su_0)=\tfrac12\|x_0\|^4-s^2\|x_0\|^2+\tfrac12s^4$, with $\frac{d^2}{ds^2}f(su_0)\big|_{s=0}=-2\|x_0\|^2<0$. So $f$ is not convex.
+
+\textbf{(b)} $\nabla f(x)=2(\|x\|^2I-A)x$; stationary points solve $Ax=\|x\|^2x$. Since $A=x_0x_0^T$ has eigenvalue $0$ on $x_0^\perp$ (dimension $n-1$) and eigenvalue $\|x_0\|^2$ on $\operatorname{span}(x_0)$: for $x\perp x_0$, $x\ne0$, the equation forces $0=\|x\|^2x$, impossible; for $x=cx_0$, matching eigenvalues forces $c^2=1$; mixed vectors $x=cx_0+w$ ($w\perp x_0$, $w\ne0$) give a contradiction since $Ax$ has no $w$-component while $\|x\|^2x$ does. Hence
+\[
+\text{stationary points: } x=0,\ x=x_0,\ x=-x_0.
+\]
+
+\textbf{(c)} $f(x_0)=f(-x_0)=0$, the global minimum value (since $x_0x_0^T=(-x_0)(-x_0)^T=A$), so both are global (hence local) minima. $f(0)=\tfrac12\|x_0\|^4>0$; along $u_0$, $f(su_0)-f(0)=s^2(\tfrac12s^2-\|x_0\|^2)<0$ for small $s\ne0$, while along any unit $w\perp x_0$, $f(sw)=f(0)+\tfrac12s^4\ge f(0)$. So $x=0$ is a saddle point, not a local minimum. The only local minima are $\pm x_0$, both global: \textbf{every local optimum is a global optimum.} $\blacksquare$
+\end{solution}
+
+\section*{Problem 6 (Rank-one matrix factorization)}
+
+Let $A=x_0y_0^T\ne0$, $x_0,y_0\in\R^n$. Consider $f(x,y)=\tfrac12\|A-xy^T\|_F^2$.
+
+\begin{solution}
+Expanding: $f(x,y)=\tfrac12\|x_0\|^2\|y_0\|^2-(x_0^Tx)(y_0^Ty)+\tfrac12\|x\|^2\|y\|^2$, and $f\ge0$ always with equality iff $xy^T=A$.
+
+\textbf{(a)} Along $x=su_0,\,y=sv_0$ ($u_0=x_0/\|x_0\|$, $v_0=y_0/\|y_0\|$, $C=\|x_0\|\|y_0\|$): $f(su_0,sv_0)=\tfrac12(C-s^2)^2$, with second derivative $-2C<0$ at $s=0$. Not convex.
+
+\textbf{(b)} $\nabla_xf=-Ay+\|y\|^2x$, $\nabla_yf=-A^Tx+\|x\|^2y$; stationary points solve
+\[
+(y_0^Ty)x_0=\|y\|^2x, \qquad (x_0^Tx)y_0=\|x\|^2y.
+\]
+If $x=0$: forces $y\perp y_0$. If $y=0$: forces $x\perp x_0$. If $x,y\ne0$: the first equation gives $x=\lambda x_0$ with $\lambda:=(y_0^Ty)/\|y\|^2\ne0$; substituting into the second gives $y=y_0/\lambda$. (Direct check: $xy^T=\lambda x_0\cdot(y_0/\lambda)^T=A$ exactly.) So
+\[
+\text{stationary points: } \{(0,y):y\perp y_0\}\cup\{(x,0):x\perp x_0\}\cup\{(\lambda x_0,y_0/\lambda):\lambda\ne0\}.
+\]
+
+\textbf{(c)} The third family satisfies $xy^T=A$ exactly, achieving $f=0$, the global minimum. For $(0,\bar y)$ with $\bar y\perp y_0$: perturbing $x=\varepsilon x_0,\,y=\bar y+k\varepsilon y_0$ gives
+\[
+f(\varepsilon x_0,\bar y+k\varepsilon y_0) = f(0,\bar y) + \varepsilon^2\Big[-k\|x_0\|^2\|y_0\|^2+\tfrac12\|x_0\|^2\|\bar y\|^2\Big] + O(\varepsilon^4);
+\]
+choosing $k>\|\bar y\|^2/(2\|y_0\|^2)$ makes the bracket negative, so $f$ strictly decreases for small $\varepsilon>0$: $(0,\bar y)$ is not a local minimum. The symmetric argument handles $(\bar x,0)$, $\bar x\perp x_0$. Since every stationary point is either a global minimum or not a local minimum at all: \textbf{every local optimum is a global optimum.} $\blacksquare$
+\end{solution}
+
+\end{document}
