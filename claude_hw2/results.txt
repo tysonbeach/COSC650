@@ -1,0 +1,67 @@
+
+==============================================================================
+PROBLEM 1: average epsilon over 5 realizations
+==============================================================================
+  seed 0: kappa =      436.6   (mu = 0.8837, L = 385.78)
+  seed 1: kappa =      349.3   (mu = 1.0978, L = 383.50)
+  seed 2: kappa =      333.5   (mu = 1.1996, L = 400.04)
+  seed 3: kappa =      315.2   (mu = 1.2125, L = 382.22)
+  seed 4: kappa =      370.0   (mu = 0.9551, L = 353.40)
+
+  Per-realization eps (columns = realizations 1..5) and mean:
+   GD exact line search                       -4.895    -8.123    -7.657    -6.756    -6.147   | mean =   -6.715
+   GD Armijo                                  -5.338    -8.681    -8.365    -7.583    -7.281   | mean =   -7.450
+   GD diminishing                             -0.458    -0.873    -0.863    -0.710    -0.654   | mean =   -0.712
+   GD constant 1/L                            -2.462    -4.583    -4.371    -3.573    -3.254   | mean =   -3.649
+   Accelerated (t_k)                          -8.655    -8.840    -8.562    -7.762    -7.472   | mean =   -8.258
+   Newton                                    -32.574   -32.812   -32.847   -33.346   -32.791   | mean =  -32.874
+   [bonus] Accelerated (const. momentum)     -32.735   -33.663   -33.367   -32.968   -32.923   | mean =  -33.131
+
+  Condition numbers: [436.6 349.3 333.5 315.2 370. ]
+  (eps floor at machine precision = log(1e-16) = -36.84)
+
+==============================================================================
+PROBLEM 2: average epsilon over 5 realizations
+==============================================================================
+  seed 0: kappa =      121.8   (mu = 3.1862, L = 388.08)
+  seed 1: kappa =      113.5   (mu = 3.4004, L = 385.80)
+  seed 2: kappa =      114.9   (mu = 3.5022, L = 402.34)
+  seed 3: kappa =      109.4   (mu = 3.5151, L = 384.52)
+  seed 4: kappa =      109.2   (mu = 3.2577, L = 355.71)
+
+  Per-realization eps (columns = realizations 1..5) and mean:
+   GD exact line search                      -17.393   -20.864   -19.538   -19.050   -19.844   | mean =  -19.338
+   GD Armijo                                 -15.838   -16.011   -16.964   -16.278   -16.945   | mean =  -16.407
+   GD diminishing                             -1.579    -1.896    -1.861    -1.857    -1.836   | mean =   -1.806
+   GD constant 1/L                            -8.711   -10.877   -10.436    -9.919   -10.128   | mean =  -10.014
+   Accelerated (t_k)                         -10.988   -12.326   -12.018   -11.845   -11.957   | mean =  -11.827
+   Newton                                    -33.825   -33.741   -33.761   -33.581   -33.576   | mean =  -33.696
+   [bonus] Accelerated (const. momentum)     -33.903   -33.995   -33.870   -33.668   -34.175   | mean =  -33.922
+
+  Condition numbers: [121.8 113.5 114.9 109.4 109.2]
+  (eps floor at machine precision = log(1e-16) = -36.84)
+
+==============================================================================
+PROBLEM 3 (a-c): step-size robustness, instance of Problem 1
+==============================================================================
+  kappa = 436.6, L = 385.78, mu = 0.8837
+  GD  : converges for alpha*L in [0.10, 2.00]   (diverges for the rest of [0.1, 2.2])
+  AGD : converges for alpha*L in [0.10, 1.30]   (diverges for the rest of [0.1, 2.2])
+/usr/local/lib/python3.12/dist-packages/matplotlib/scale.py:270: RuntimeWarning: overflow encountered in power
+  return np.power(self.base, values)
+
+==============================================================================
+PROBLEM 3 (d): step-size robustness, instance of Problem 2
+==============================================================================
+  kappa = 121.8, L = 388.08, mu = 3.1862
+  GD  : converges for alpha*L in [0.10, 2.00]   (diverges for the rest of [0.1, 2.2])
+  AGD : converges for alpha*L in [0.10, 1.30]   (diverges for the rest of [0.1, 2.2])
+
+==============================================================================
+PROBLEM 4: restarting accelerated gradient (instance of Problem 2)
+==============================================================================
+  kappa = 121.8, sqrt(kappa) = 11.04
+  no restart                    log(e_400) =   -7.083
+  restart T = 1*sqrt(kappa)     log(e_400) =   -7.511
+  restart T = 5*sqrt(kappa)     log(e_400) =  -16.291
+  restart T = 20*sqrt(kappa)    log(e_400) =  -11.299
